@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maslow's Needs: Birth to 50</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --panel: #0f1218;
+    --physiological: #e05c2b;
+    --safety: #d4a537;
+    --belonging: #4a9d7a;
+    --esteem: #5b8fd4;
+    --self: #a66dd4;
+    --text: #e8e2d5;
+    --muted: #5a5a6a;
+    --line: rgba(255,255,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    padding: 2.5rem 2rem 1rem;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .subtitle {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .legend {
+    display: flex;
+    gap: 1rem;
+    padding: 0.8rem 2rem;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .legend-item:hover { color: var(--text); }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .diagram-container {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+    padding: 2rem 1rem 3rem;
+  }
+
+  svg {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+  }
+
+  .tooltip {
+    position: fixed;
+    background: #1a1e28;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    max-width: 240px;
+    font-size: 0.68rem;
+    line-height: 1.6;
+    color: var(--text);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+
+  .tooltip.visible { opacity: 1; }
+
+  .tooltip-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .age-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 2rem 1rem;
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    overflow-x: auto;
+  }
+
+  .phase-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Human Connections: Birth to 50</h1>
+  <span class="subtitle">Maslow's Hierarchy Across the Lifespan</span>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--physiological)"></div>Physiological</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--safety)"></div>Safety & Security</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--belonging)"></div>Love & Belonging</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--esteem)"></div>Esteem</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--self)"></div>Self-Actualization</div>
+</div>
+
+<div class="diagram-container">
+  <svg id="mainSvg" viewBox="0 0 1100 680" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-title" id="tt-title"></div>
+  <div id="tt-body"></div>
+</div>
+
+<script>
+const W = 1100, H = 680;
+const svg = document.getElementById('mainSvg');
+const tooltip = document.getElementById('tooltip');
+
+// Colors
+const C = {
+  physiological: '#e05c2b',
+  safety: '#d4a537',
+  belonging: '#4a9d7a',
+  esteem: '#5b8fd4',
+  self: '#a66dd4',
+  bg: '#0a0c10',
+  line: 'rgba(255,255,255,0.05)'
+};
+
+// Life phases: x positions
+const phases = [
+  { label: 'Birth', age: 0, x: 80 },
+  { label: '2', age: 2, x: 160 },
+  { label: '5', age: 5, x: 250 },
+  { label: '10', age: 10, x: 360 },
+  { label: '15', age: 15, x: 470 },
+  { label: '20', age: 20, x: 580 },
+  { label: '25', age: 25, x: 670 },
+  { label: '30', age: 30, x: 760 },
+  { label: '40', age: 40, x: 880 },
+  { label: '50', age: 50, x: 1020 },
+];
+
+// Nodes: each is a moment/milestone on the diagram
+const nodes = [
+  // PHYSIOLOGICAL — row y ~580
+  { id: 'p1', tier: 'physiological', label: 'First Breath', age: 0, x: 80, y: 570, info: 'Lungs inflate. Heart beats independently. The first autonomous act of life.' },
+  { id: 'p2', tier: 'physiological', label: 'Nursing', age: 0.5, x: 140, y: 560, info: 'Feeding bonds body and caregiver. Hunger signals are the first language.' },
+  { id: 'p3', tier: 'physiological', label: 'Sleep Cycles', age: 2, x: 200, y: 575, info: 'Circadian rhythms stabilize. Sleep becomes the brain\'s consolidation engine.' },
+  { id: 'p4', tier: 'physiological', label: 'Motor Control', age: 5, x: 280, y: 560, info: 'Fine and gross motor mastery. The body becomes a reliable instrument.' },
+  { id: 'p5', tier: 'physiological', label: 'Puberty', age: 14, x: 460, y: 565, info: 'Hormonal cascade reshapes the body. New drives and physical identity emerge.' },
+  { id: 'p6', tier: 'physiological', label: 'Peak Vitality', age: 25, x: 660, y: 560, info: 'Physical systems at full capacity. Strength, immune response, and reflexes peak.' },
+  { id: 'p7', tier: 'physiological', label: 'Metabolic Shift', age: 40, x: 880, y: 570, info: 'Metabolism slows. Sleep patterns shift. The body requires more intentional care.' },
+  { id: 'p8', tier: 'physiological', label: 'Mid-life Baseline', age: 50, x: 1020, y: 560, info: 'Health habits compound. The choices of earlier decades become the foundation now.' },
+
+  // SAFETY — row y ~460
+  { id: 's1', tier: 'safety', label: 'Caregiver Bond', age: 0, x: 90, y: 455, info: 'Attachment to a caregiver creates the first experience of a safe world.' },
+  { id: 's2', tier: 'safety', label: 'Routine', age: 2, x: 185, y: 445, info: 'Predictable schedules create psychological safety. The world becomes legible.' },
+  { id: 's3', tier: 'safety', label: 'Home as Anchor', age: 5, x: 270, y: 460, info: 'A stable home environment allows exploration. Safety enables curiosity.' },
+  { id: 's4', tier: 'safety', label: 'Rules & Structure', age: 10, x: 370, y: 448, info: 'School introduces structured systems. Understanding rules = understanding safety.' },
+  { id: 's5', tier: 'safety', label: 'Economic Anxiety', age: 20, x: 570, y: 455, info: 'First real exposure to financial precarity. Safety must now be actively constructed.' },
+  { id: 's6', tier: 'safety', label: 'Stable Income', age: 28, x: 720, y: 445, info: 'Financial stability reduces background threat. Savings begin to represent security.' },
+  { id: 's7', tier: 'safety', label: 'Health Awareness', age: 40, x: 885, y: 455, info: 'Health screenings, insurance, and planning become central to safety.' },
+  { id: 's8', tier: 'safety', label: 'Legacy Planning', age: 50, x: 1025, y: 448, info: 'Estate planning, retirement funds, and protecting dependents defines safety at 50.' },
+
+  // BELONGING — row y ~350
+  { id: 'b1', tier: 'belonging', label: 'Parent Mirror', age: 0.5, x: 120, y: 345, info: 'Parents reflect the infant\'s emotions back, creating the first experience of being "seen."' },
+  { id: 'b2', tier: 'belonging', label: 'First Friends', age: 4, x: 240, y: 335, info: 'Parallel and cooperative play. The first voluntary social bonds outside family.' },
+  { id: 'b3', tier: 'belonging', label: 'Peer Group', age: 10, x: 365, y: 348, info: 'Peer belonging becomes critical. Acceptance and exclusion shape identity.' },
+  { id: 'b4', tier: 'belonging', label: 'First Love', age: 16, x: 490, y: 338, info: 'Romantic attachment introduces vulnerability and reciprocal intimacy.' },
+  { id: 'b5', tier: 'belonging', label: 'Tribe / Community', age: 22, x: 610, y: 345, info: 'Finding your people — shared values, subcultures, professions, or causes.' },
+  { id: 'b6', tier: 'belonging', label: 'Partnership', age: 30, x: 760, y: 338, info: 'Long-term partnership or deep chosen family. Belonging becomes intentional.' },
+  { id: 'b7', tier: 'belonging', label: 'Parenting / Mentoring', age: 38, x: 870, y: 348, info: 'Offering belonging to others. The direction of care begins to reverse.' },
+  { id: 'b8', tier: 'belonging', label: 'Legacy Bonds', age: 50, x: 1020, y: 340, info: 'Relationships distill. Quality over quantity. Deep roots over wide networks.' },
+
+  // ESTEEM — row y ~240
+  { id: 'e1', tier: 'esteem', label: 'First Steps', age: 1, x: 140, y: 235, info: 'Walking is the first triumph of will over gravity. Pride and applause arrive together.' },
+  { id: 'e2', tier: 'esteem', label: 'Academic Achievement', age: 8, x: 330, y: 225, info: 'Grades, gold stars, trophies. External validation maps the self.' },
+  { id: 'e3', tier: 'esteem', label: 'Identity Formation', age: 16, x: 490, y: 235, info: 'Who am I? Role experimentation and the search for authentic selfhood.' },
+  { id: 'e4', tier: 'esteem', label: 'Career Competence', age: 24, x: 635, y: 228, info: 'Mastery in a domain. Recognition from peers. Skills translate to self-worth.' },
+  { id: 'e5', tier: 'esteem', label: 'Reputation', age: 35, x: 820, y: 235, info: 'What you\'ve built matters to others. Reputation becomes a kind of external self.' },
+  { id: 'e6', tier: 'esteem', label: 'Earned Authority', age: 45, x: 950, y: 228, info: 'Leadership earned through experience. Confidence no longer requires external proof.' },
+  { id: 'e7', tier: 'esteem', label: 'Inner Validation', age: 50, x: 1020, y: 235, info: 'Esteem internalizes. Self-respect no longer depends on others\' recognition.' },
+
+  // SELF-ACTUALIZATION — row y ~120
+  { id: 'a1', tier: 'self', label: 'Wonder', age: 3, x: 215, y: 120, info: 'Curiosity as pure state. Children ask "why" without needing answers to be useful.' },
+  { id: 'a2', tier: 'self', label: 'Creative Play', age: 7, x: 310, y: 108, info: 'Art, building, storytelling. Imagination operates freely before judgment arrives.' },
+  { id: 'a3', tier: 'self', label: 'Purpose Seeking', age: 18, x: 530, y: 115, info: 'The adolescent question: what is my life for? First attempts at meaning-making.' },
+  { id: 'a4', tier: 'self', label: 'Deep Calling', age: 28, x: 720, y: 105, info: 'Vocation or mission crystallizes. Work aligns with inner drive.' },
+  { id: 'a5', tier: 'self', label: 'Flow States', age: 35, x: 820, y: 118, info: 'Mastery and challenge align. Time dissolves. The self disappears into the work.' },
+  { id: 'a6', tier: 'self', label: 'Wisdom Integration', age: 45, x: 950, y: 108, info: 'Experience is organized into understanding. Patterns become principles.' },
+  { id: 'a7', tier: 'self', label: 'Transcendence', age: 50, x: 1020, y: 118, info: 'Moving beyond the self. Contributing to something larger — culture, people, future.' },
+];
+
+// Connections (within-tier and cross-tier)
+const connections = [
+  // Physiological chain
+  ['p1','p2'],['p2','p3'],['p3','p4'],['p4','p5'],['p5','p6'],['p6','p7'],['p7','p8'],
+  // Safety chain
+  ['s1','s2'],['s2','s3'],['s3','s4'],['s4','s5'],['s5','s6'],['s6','s7'],['s7','s8'],
+  // Belonging chain
+  ['b1','b2'],['b2','b3'],['b3','b4'],['b4','b5'],['b5','b6'],['b6','b7'],['b7','b8'],
+  // Esteem chain
+  ['e1','e2'],['e2','e3'],['e3','e4'],['e4','e5'],['e5','e6'],['e6','e7'],
+  // Self-act chain
+  ['a1','a2'],['a2','a3'],['a3','a4'],['a4','a5'],['a5','a6'],['a6','a7'],
+
+  // CROSS-TIER connections (key psychological bridges)
+  ['p2','s1'],   // nursing → caregiver bond
+  ['p2','b1'],   // nursing → parent mirror
+  ['s1','b1'],   // caregiver bond → parent mirror
+  ['s2','b2'],   // routine → first friends
+  ['b2','e1'],   // first friends → first steps (social reinforcement)
+  ['p4','e1'],   // motor control → first steps (physical basis)
+  ['b3','e2'],   // peer group → academic achievement
+  ['s3','a1'],   // home anchor → wonder
+  ['a1','b2'],   // wonder → first friends
+  ['b4','e3'],   // first love → identity
+  ['e3','a3'],   // identity → purpose seeking
+  ['s5','e4'],   // economic anxiety → career competence
+  ['e4','b5'],   // career → tribe/community
+  ['b5','a4'],   // community → deep calling
+  ['b6','a4'],   // partnership → deep calling
+  ['e5','a5'],   // reputation → flow states
+  ['a5','b7'],   // flow states → parenting/mentoring
+  ['e6','a6'],   // earned authority → wisdom
+  ['a6','e7'],   // wisdom → inner validation
+  ['b8','a7'],   // legacy bonds → transcendence
+  ['e7','a7'],   // inner validation → transcendence
+  ['s8','b8'],   // legacy planning → legacy bonds
+  ['p7','s7'],   // metabolic shift → health awareness
+];
+
+// Build lookup
+const nodeMap = {};
+nodes.forEach(n => nodeMap[n.id] = n);
+
+function tierColor(tier) {
+  return C[tier] || '#888';
+}
+
+function makeSvgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+// Defs
+const defs = makeSvgEl('defs', {});
+
+// Glow filters per tier
+['physiological','safety','belonging','esteem','self'].forEach(tier => {
+  const f = makeSvgEl('filter', { id: `glow-${tier}`, x: '-50%', y: '-50%', width: '200%', height: '200%' });
+  const fe = makeSvgEl('feGaussianBlur', { stdDeviation: '3', result: 'coloredBlur' });
+  const feMerge = makeSvgEl('feMerge', {});
+  const feMergeNode1 = makeSvgEl('feMergeNode', { in: 'coloredBlur' });
+  const feMergeNode2 = makeSvgEl('feMergeNode', { in: 'SourceGraphic' });
+  feMerge.appendChild(feMergeNode1);
+  feMerge.appendChild(feMergeNode2);
+  f.appendChild(fe);
+  f.appendChild(feMerge);
+  defs.appendChild(f);
+});
+
+svg.appendChild(defs);
+
+// Background grid lines (age markers)
+const gridG = makeSvgEl('g', { opacity: '0.35' });
+phases.forEach(p => {
+  const line = makeSvgEl('line', {
+    x1: p.x, y1: 60, x2: p.x, y2: 620,
+    stroke: 'rgba(255,255,255,0.07)', 'stroke-width': '1',
+    'stroke-dasharray': '3,6'
+  });
+  gridG.appendChild(line);
+
+  const label = makeSvgEl('text', {
+    x: p.x, y: 640,
+    'text-anchor': 'middle',
+    fill: '#3a3a4a',
+    'font-size': '9',
+    'font-family': 'DM Mono, monospace',
+    'letter-spacing': '0.05em'
+  });
+  label.textContent = p.age === 0 ? 'BIRTH' : `AGE ${p.age}`;
+  gridG.appendChild(label);
+});
+svg.appendChild(gridG);
+
+// Tier background bands
+const bands = [
+  { tier: 'physiological', y: 540, h: 65 },
+  { tier: 'safety', y: 428, h: 60 },
+  { tier: 'belonging', y: 318, h: 60 },
+  { tier: 'esteem', y: 208, h: 58 },
+  { tier: 'self', y: 88, h: 58 },
+];
+
+const bandG = makeSvgEl('g', {});
+bands.forEach(b => {
+  const rect = makeSvgEl('rect', {
+    x: 30, y: b.y, width: 1040, height: b.h,
+    fill: tierColor(b.tier), opacity: '0.04', rx: '4'
+  });
+  bandG.appendChild(rect);
+
+  const label = makeSvgEl('text', {
+    x: 38, y: b.y + b.h - 8,
+    fill: tierColor(b.tier), opacity: '0.35',
+    'font-size': '7.5',
+    'font-family': 'DM Mono, monospace',
+    'letter-spacing': '0.15em',
+    'text-transform': 'uppercase'
+  });
+  label.textContent = b.tier.toUpperCase().replace('PHYSIOLOGICAL','PHYSIOLOGICAL').replace('SELF','SELF-ACTUALIZATION');
+  bandG.appendChild(label);
+});
+svg.appendChild(bandG);
+
+// Draw connections
+const connG = makeSvgEl('g', { opacity: '0.5' });
+connections.forEach(([aId, bId]) => {
+  const a = nodeMap[aId], b = nodeMap[bId];
+  if (!a || !b) return;
+  const sameTier = a.tier === b.tier;
+  const color = sameTier ? tierColor(a.tier) : 'rgba(255,255,255,0.18)';
+  const strokeW = sameTier ? '1.5' : '1';
+  const dash = sameTier ? 'none' : '4,5';
+
+  const dx = (b.x - a.x) * 0.45;
+  const path = makeSvgEl('path', {
+    d: `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`,
+    fill: 'none',
+    stroke: color,
+    'stroke-width': strokeW,
+    'stroke-dasharray': dash,
+    opacity: sameTier ? '0.6' : '0.35',
+  });
+  connG.appendChild(path);
+});
+svg.appendChild(connG);
+
+// Draw nodes
+const nodeG = makeSvgEl('g', {});
+nodes.forEach(n => {
+  const color = tierColor(n.tier);
+  const g = makeSvgEl('g', {
+    transform: `translate(${n.x},${n.y})`,
+    cursor: 'pointer',
+    class: 'node-group'
+  });
+
+  // Outer ring
+  const ring = makeSvgEl('circle', {
+    r: '9', fill: 'none',
+    stroke: color, 'stroke-width': '1',
+    opacity: '0.4'
+  });
+
+  // Core
+  const circle = makeSvgEl('circle', {
+    r: '5.5',
+    fill: color,
+    filter: `url(#glow-${n.tier})`,
+    opacity: '0.9'
+  });
+
+  // Label
+  const text = makeSvgEl('text', {
+    y: '-14',
+    'text-anchor': 'middle',
+    fill: color,
+    'font-size': '7.5',
+    'font-family': 'DM Mono, monospace',
+    'letter-spacing': '0.04em',
+    opacity: '0.85'
+  });
+  text.textContent = n.label;
+
+  g.appendChild(ring);
+  g.appendChild(circle);
+  g.appendChild(text);
+
+  // Hover
+  g.addEventListener('mouseenter', (e) => {
+    ring.setAttribute('opacity', '1');
+    ring.setAttribute('r', '11');
+    circle.setAttribute('r', '7');
+    document.getElementById('tt-title').textContent = n.label;
+    document.getElementById('tt-body').textContent = n.info;
+    tooltip.classList.add('visible');
+  });
+
+  g.addEventListener('mousemove', (e) => {
+    tooltip.style.left = (e.clientX + 16) + 'px';
+    tooltip.style.top = (e.clientY - 20) + 'px';
+  });
+
+  g.addEventListener('mouseleave', () => {
+    ring.setAttribute('opacity', '0.4');
+    ring.setAttribute('r', '9');
+    circle.setAttribute('r', '5.5');
+    tooltip.classList.remove('visible');
+  });
+
+  nodeG.appendChild(g);
+});
+svg.appendChild(nodeG);
+
+// Title labels for tiers on right side
+const tierLabels = [
+  { tier: 'physiological', y: 572, short: 'I. PHYSIOLOGICAL' },
+  { tier: 'safety', y: 460, short: 'II. SAFETY' },
+  { tier: 'belonging', y: 348, short: 'III. BELONGING' },
+  { tier: 'esteem', y: 238, short: 'IV. ESTEEM' },
+  { tier: 'self', y: 120, short: 'V. SELF-ACTUALIZATION' },
+];
+
+// Decorative flow arrows at milestone points
+// Birth marker
+const birthMarker = makeSvgEl('circle', {
+  cx: 80, cy: 330, r: 3,
+  fill: 'none', stroke: 'rgba(255,255,255,0.2)', 'stroke-width': '1'
+});
+svg.appendChild(birthMarker);
+
+// Vertical spine connecting all tiers at birth
+const spine = makeSvgEl('line', {
+  x1: 80, y1: 90, x2: 80, y2: 590,
+  stroke: 'rgba(255,255,255,0.07)', 'stroke-width': '1.5',
+  'stroke-dasharray': '2,4'
+});
+svg.insertBefore(spine, connG);
+
+// A pulse animation for the birth node (p1)
+const p1 = nodeMap['p1'];
+const pulseCircle = makeSvgEl('circle', {
+  cx: p1.x, cy: p1.y, r: '8',
+  fill: 'none', stroke: tierColor('physiological'), 'stroke-width': '1',
+  opacity: '0'
+});
+const anim = makeSvgEl('animate', {
+  attributeName: 'r', from: '8', to: '24',
+  dur: '2s', repeatCount: 'indefinite'
+});
+const animOp = makeSvgEl('animate', {
+  attributeName: 'opacity', from: '0.6', to: '0',
+  dur: '2s', repeatCount: 'indefinite'
+});
+pulseCircle.appendChild(anim);
+pulseCircle.appendChild(animOp);
+svg.appendChild(pulseCircle);
+</script>
+</body>
+</html>
