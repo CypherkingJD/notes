@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Role Workflows</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0e14;
+    --surface: #111520;
+    --surface2: #171d2e;
+    --border: #1e2a45;
+    --accent-calea: #00c8ff;
+    --accent-gis: #00e87a;
+    --accent-auto: #f5a623;
+    --accent-tech: #c084fc;
+    --accent-mgr: #ff6b6b;
+    --accent-lead: #ffd93d;
+    --accent-consult: #ff9a3c;
+    --accent-mw: #00f5d4;
+    --text: #d0dff0;
+    --muted: #4a607a;
+    --done: #1a3a1a;
+    --done-border: #00e87a44;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 32px 40px 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .header-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(32px, 5vw, 54px);
+    letter-spacing: -1px;
+    color: #fff;
+    line-height: 1;
+  }
+
+  h1 span {
+    color: var(--accent-calea);
+  }
+
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-top: 6px;
+  }
+
+  /* NAV TABS */
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 4px;
+    padding: 28px 40px 0;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 22px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    outline: none;
+  }
+
+  .tab::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0; right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background 0.2s;
+  }
+
+  .tab:hover { color: var(--text); border-color: var(--muted); }
+
+  .tab.active[data-role="calea"] { color: var(--accent-calea); border-color: var(--accent-calea); }
+  .tab.active[data-role="calea"]::after { background: var(--accent-calea); }
+
+  .tab.active[data-role="gis"] { color: var(--accent-gis); border-color: var(--accent-gis); }
+  .tab.active[data-role="gis"]::after { background: var(--accent-gis); }
+
+  .tab.active[data-role="auto"] { color: var(--accent-auto); border-color: var(--accent-auto); }
+  .tab.active[data-role="auto"]::after { background: var(--accent-auto); }
+
+  .tab.active[data-role="tech"] { color: var(--accent-tech); border-color: var(--accent-tech); }
+  .tab.active[data-role="tech"]::after { background: var(--accent-tech); }
+
+  .tab.active[data-role="mgr"] { color: var(--accent-mgr); border-color: var(--accent-mgr); }
+  .tab.active[data-role="mgr"]::after { background: var(--accent-mgr); }
+
+  .tab.active[data-role="lead"] { color: var(--accent-lead); border-color: var(--accent-lead); }
+  .tab.active[data-role="lead"]::after { background: var(--accent-lead); }
+
+  .tab.active[data-role="consult"] { color: var(--accent-consult); border-color: var(--accent-consult); }
+  .tab.active[data-role="consult"]::after { background: var(--accent-consult); }
+
+  .tab.active[data-role="mw"] { color: var(--accent-mw); border-color: var(--accent-mw); }
+  .tab.active[data-role="mw"]::after { background: var(--accent-mw); }
+
+  /* DIVIDER */
+  .divider {
+    position: relative;
+    z-index: 10;
+    height: 1px;
+    background: var(--border);
+    margin: 0 40px;
+  }
+
+  /* MAIN CONTENT */
+  main {
+    position: relative;
+    z-index: 10;
+    padding: 36px 40px 60px;
+  }
+
+  .role-section { display: none; animation: fadeIn 0.3s ease; }
+  .role-section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ROLE HEADER */
+  .role-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .role-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .role-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 36px;
+    letter-spacing: -0.5px;
+  }
+
+  .role-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    margin-left: 44px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* WORKFLOW PHASES */
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+    gap: 10px;
+  }
+
+  .phase-header:hover { background: var(--surface2); }
+
+  .phase-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .phase-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+
+  .phase-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .phase-progress {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .chevron {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    transition: transform 0.25s;
+    color: var(--muted);
+  }
+
+  .phase.open .chevron { transform: rotate(180deg); }
+
+  /* PROGRESS BAR */
+  .phase-bar-wrap {
+    height: 2px;
+    background: var(--border);
+  }
+
+  .phase-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* STEPS */
+  .steps {
+    display: none;
+    padding: 6px 0 12px;
+  }
+
+  .phase.open .steps { display: block; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-top: 1px solid var(--border);
+  }
+
+  .step:hover { background: var(--surface2); }
+
+  .step.done { background: rgba(0,232,122,0.03); }
+
+  .step-check {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--muted);
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 11px;
+  }
+
+  .step.done .step-check {
+    background: var(--accent-gis);
+    border-color: var(--accent-gis);
+    color: #000;
+  }
+
+  .step-body { flex: 1; }
+
+  .step-title {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    transition: color 0.2s;
+  }
+
+  .step.done .step-title { color: var(--muted); text-decoration: line-through; }
+
+  .step-detail {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.5;
+  }
+
+  .step-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 1px;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+
+  /* RESET BTN */
+  .reset-btn {
+    margin-top: 24px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { border-color: var(--muted); color: var(--text); }
+
+  /* SUMMARY BAR */
+  .summary-bar {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .summary-stat {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .summary-stat strong {
+    color: var(--text);
+    font-size: 18px;
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  @media (max-width: 600px) {
+    header, nav, main { padding-left: 20px; padding-right: 20px; }
+    .divider { margin: 0 20px; }
+    .phases { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-badge">Workflow Manager</div>
+    <h1>ROLE <span>OPS</span></h1>
+    <div class="subtitle">// EIGHT-ROLE WORKFLOW SYSTEM — INTERACTIVE CHECKLIST</div>
+  </div>
+</header>
+
+<nav>
+  <button class="tab active" data-role="mgr" onclick="switchRole('mgr')">🏢 Support Manager</button>
+  <button class="tab" data-role="calea" onclick="switchRole('calea')">⚖ Lawful Access</button>
+  <button class="tab" data-role="consult" onclick="switchRole('consult')">🎯 Tech Consultant</button>
+  <button class="tab" data-role="lead" onclick="switchRole('lead')">⚙ Automation Lead</button>
+  <button class="tab" data-role="auto" onclick="switchRole('auto')">🐍 Automation Dev</button>
+  <button class="tab" data-role="gis" onclick="switchRole('gis')">🗺 ArcGIS Analyst</button>
+  <button class="tab" data-role="mw" onclick="switchRole('mw')">📶 Microwave SME</button>
+  <button class="tab" data-role="tech" onclick="switchRole('tech')">📡 Technician</button>
+</nav>
+<div class="divider"></div>
+
+<main>
+
+  <!-- ===== SUPPORT MANAGER ===== -->
+  <section class="role-section active" id="role-mgr">
+    <div class="role-header">
+      <div class="role-icon">🏢</div>
+      <div class="role-title" style="color:var(--accent-mgr)">Telecom Support Manager</div>
+    </div>
+    <div class="role-desc">// PRIMARY ROLE · DOTTED-LINE SUPERVISOR · 3 DIRECT TECHNICIANS — TEAM DEVELOPMENT & OPERATIONS</div>
+    <div class="summary-bar" id="summary-mgr"></div>
+    <div class="phases" id="phases-mgr"></div>
+    <button class="reset-btn" onclick="resetRole('mgr')">↺ Reset All Steps</button>
+  </section>
+
+  <!-- ===== CALEA ===== -->
+  <section class="role-section" id="role-calea">
+    <div class="role-header">
+      <div class="role-icon">⚖</div>
+      <div class="role-title" style="color:var(--accent-calea)">Lawful Access Liaison</div>
+    </div>
+    <div class="role-desc">// CALEA · ECPA · TITLE III · EXIGENT · NSL — FULL SPECTRUM LAWFUL ACCESS COMPLIANCE</div>
+    <div class="summary-bar" id="summary-calea"></div>
+    <div class="phases" id="phases-calea"></div>
+    <button class="reset-btn" onclick="resetRole('calea')">↺ Reset All Steps</button>
+  </section>
+
+  <!-- ===== TECHNICAL CONSULTANT ===== -->
+  <section class="role-section" id="role-consult">
+    <div class="role-header">
+      <div class="role-icon">🎯</div>
+      <div class="role-title" style="color:var(--accent-consult)">Technical Consultant</div>
+    </div>
+    <div class="role-desc">// TIER-3 ESCALATIONS · BREAKGLASS OUTAGES — TOUGHEST CASES, EXPERT ANALYSIS & RESOLUTION</div>
+    <div class="summary-bar" id="summary-consult"></div>
+    <div class="phases" id="phases-consult"></div>
+    <button class="reset-btn" onclick="resetRole('consult')">↺ Reset All Steps</button>
+  </section>
+
+  <!-- ===== AUTOMATION LEAD ===== -->
+  <section class="role-section" id="role-lead">
+    <div class="role-header">
+      <div class="role-icon">⚙</div>
+      <div class="role-title" style="color:var(--accent-lead)">Automation Team Lead</div>
+    </div>
+    <div class="role-desc">// TEAM LEADERSHIP — ROADMAP, DELIVERY & TECHNICAL DIRECTION</div>
+    <div class="summary-bar" id="summary-lead"></div>
+    <div class="phases" id="phases-lead"></div>
+    <button class="reset-btn" onclick="resetRole('lead')">↺ Reset All Steps</button>
+  </section>
+
+  <!-- ===== AUTOMATION DEV ===== -->
+  <section class="role-section" id="role-auto">
+    <div class="role-header">
+      <div class="role-icon">🐍</div>
+      <div class="role-title" style="color:var(--accent-auto)">Automation Dev</div>
+    </div>
+    <div class="role-desc">// PYTHON SCRIPTING — BUILD, TEST, DEPLOY AUTOMATION WORKFLOWS</div>
+    <div class="summary-bar" id="summary-auto"></div>
+    <div class="phases" id="phases-auto"></div>
+    <button class="reset-btn" onclick="resetRole('auto')">↺ Reset All Steps</button>
+  </section>
+
+  <!-- ===== GIS ===== -->
+  <section class="role-section" id="role-gis">
+    <div class="role-header">
+      <div class="role-icon">🗺</div>
+      <div class="role-title" style="color:var(--accent-gis)">ArcGIS Analyst</div>
+    </div>
+    <div class="role-desc">// MAP CREATION & PUBLISHING — SPATIAL DATA ANALYSIS</div>
+    <div class="summary-bar" id="summary-gis"></div>
+    <div class="phases" id="phases-gis"></div>
+    <button class="reset-btn" onclick="resetRole('gis')">↺ Reset All Steps</button>
+  </section>
+
+  <!-- ===== MICROWAVE SME ===== -->
+  <section class="role-section" id="role-mw">
+    <div class="role-header">
+      <div class="role-icon">📶</div>
+      <div class="role-title" style="color:var(--accent-mw)">Microwave Radio SME</div>
+    </div>
+    <div class="role-desc">// SUBJECT MATTER EXPERT — MICROWAVE LINK DESIGN, ANALYSIS & KNOWLEDGE TRANSFER</div>
+    <div class="summary-bar" id="summary-mw"></div>
+    <div class="phases" id="phases-mw"></div>
+    <button class="reset-btn" onclick="resetRole('mw')">↺ Reset All Steps</button>
+  </section>
+
+  <!-- ===== TECH ===== -->
+  <section class="role-section" id="role-tech">
+    <div class="role-header">
+      <div class="role-icon">📡</div>
+      <div class="role-title" style="color:var(--accent-tech)">Technician</div>
+    </div>
+    <div class="role-desc">// ADVANCED REMOTE TELECOM SUPPORT — DIAGNOSTICS & RESOLUTION</div>
+    <div class="summary-bar" id="summary-tech"></div>
+    <div class="phases" id="phases-tech"></div>
+    <button class="reset-btn" onclick="resetRole('tech')">↺ Reset All Steps</button>
+  </section>
+
+<script>
+const ROLES = {
+  calea: {
+    color: 'var(--accent-calea)',
+    phases: [
+      {
+        name: 'Universal Intake & Classification',
+        steps: [
+          { title: 'Receive incoming lawful access request', detail: 'Log all incoming requests regardless of type: court orders, subpoenas, NSLs, emergency disclosures. Record agency, timestamp, and receiving agent.', tags: ['Intake','All Types'] },
+          { title: 'Classify request type', detail: 'Determine governing law and request category: Title III intercept (CALEA), pen register/trap & trace (18 USC §3121), stored content or records (ECPA §2703), exigent/emergency (18 USC §2702), or NSL (18 USC §2709).', tags: ['Classification','Critical'] },
+          { title: 'Assign case number & log', detail: 'Create unique case ID. Enter into compliance tracking system with request type, agency, legal authority cited, and assigned agent.', tags: ['Documentation'] },
+          { title: 'Route to correct workflow', detail: 'Direct to the appropriate sub-process: Intercept (CALEA/Title III), Subpoena/Court Order (ECPA), or Exigent Request. Do not process under wrong legal framework.', tags: ['Routing','Critical'] },
+        ]
+      },
+      {
+        name: 'Lawful Intercept (Title III / CALEA)',
+        steps: [
+          { title: 'Verify court order validity', detail: 'Confirm issuing judge has proper jurisdiction. Check order contains: target identifier, service type, start/end dates, specific offenses alleged, and authorizing judge signature.', tags: ['Legal','Validation','Title III'] },
+          { title: 'Confirm CALEA technical capability', detail: 'Verify carrier has certified CALEA-compliant intercept capability for the requested service type (voice, data, VoIP, etc.).', tags: ['CALEA','Technical'] },
+          { title: 'Coordinate intercept activation with carrier', detail: 'Initiate secure contact with carrier CALEA POC. Transmit court order via approved secure channel. Confirm activation and document carrier case reference.', tags: ['Carrier','Activation'] },
+          { title: 'Set up delivery channel', detail: 'Coordinate intercept delivery format (J-STD-025, ETSI, or other standard). Confirm law enforcement receiving facility is ready and tested.', tags: ['Delivery','Technical'] },
+          { title: 'Monitor intercept & track expiration', detail: 'Periodically verify intercept is active and delivery is functioning. Calendar expiration date. Notify agency in advance if renewal is needed.', tags: ['Monitoring','Compliance'] },
+          { title: 'Deactivate & close on expiration or termination', detail: 'On order expiration or receipt of termination instruction, notify carrier to deactivate. Confirm deactivation. Archive all records per retention policy.', tags: ['Closeout','Archive'] },
+        ]
+      },
+      {
+        name: 'Subpoenas & Court Orders (ECPA §2703)',
+        steps: [
+          { title: 'Validate legal instrument', detail: 'Confirm instrument type: grand jury subpoena, administrative subpoena, §2703(d) court order, or search warrant. Each compels different categories of data — know the distinction.', tags: ['Legal','ECPA','Validation'] },
+          { title: 'Determine data scope', detail: 'Map legal instrument to permissible data: subpoena = basic subscriber info & records; §2703(d) order = transactional records; warrant = content. Do not over-produce.', tags: ['Scope','Critical'] },
+          { title: 'Check for non-disclosure order (NDO)', detail: 'Determine if the instrument carries a gag order prohibiting notification to the subscriber. Log NDO status and expiration if applicable.', tags: ['NDO','Legal','Confidentiality'] },
+          { title: 'Identify and retrieve responsive records', detail: 'Locate all records that fall within the legal scope. Coordinate with internal data/records teams as needed. Do not include records outside the specified scope.', tags: ['Records','Production'] },
+          { title: 'Legal review before production', detail: 'If any ambiguity exists in scope or legal sufficiency, escalate to legal counsel before producing any data.', tags: ['Legal Review','Escalation'] },
+          { title: 'Produce records & document', detail: 'Deliver responsive records to requesting agency via approved secure method. Document what was produced, to whom, on what date, and under what authority.', tags: ['Production','Documentation'] },
+          { title: 'Close and archive', detail: 'Mark case closed. Archive all documentation including the instrument, production log, and any legal review notes per retention policy.', tags: ['Closeout','Archive'] },
+        ]
+      },
+      {
+        name: 'Exigent / Emergency Requests (18 USC §2702)',
+        steps: [
+          { title: 'Receive and immediately triage', detail: 'Exigent requests involve imminent risk of death or serious bodily injury. Treat as time-critical. Do not queue — engage immediately upon receipt.', tags: ['Exigent','Critical','Urgent'] },
+          { title: 'Verify emergency basis', detail: 'Confirm the requesting agency has articulated a specific, credible emergency. Vague or speculative threats do not meet the §2702 standard. Document the stated emergency basis.', tags: ['Legal','Verification','Exigent'] },
+          { title: 'Confirm requesting officer identity', detail: 'Verify the identity and authority of the requesting law enforcement officer. Obtain badge number, agency, and callback number. Call back to verify if needed.', tags: ['Verification','Security'] },
+          { title: 'Assess what information can be voluntarily disclosed', detail: '18 USC §2702 permits but does not require disclosure. Evaluate what subscriber/account information is responsive and appropriate to release under the emergency standard.', tags: ['Scope','Legal','ECPA'] },
+          { title: 'Escalate to legal or supervisor if uncertain', detail: 'If the emergency basis is unclear or the scope of disclosure is ambiguous, escalate immediately. Do not delay production waiting for escalation response if life is at imminent risk.', tags: ['Escalation','Critical'] },
+          { title: 'Produce and document in real time', detail: 'Provide responsive information to the requesting officer. Simultaneously document: what was shared, the stated emergency basis, officer identity, and exact timestamp.', tags: ['Production','Documentation','Exigent'] },
+          { title: 'Follow up with formal legal process', detail: 'Notify the agency that formal legal process (subpoena or court order) is required to follow up. Log case for follow-up compliance tracking.', tags: ['Follow-Up','Compliance'] },
+          { title: 'Post-incident review', detail: 'After resolution, review the disclosure for legal sufficiency and process adherence. Document lessons learned. Flag any concerns to legal counsel.', tags: ['Review','Documentation'] },
+        ]
+      },
+      {
+        name: 'National Security Letters (18 USC §2709)',
+        steps: [
+          { title: 'Verify NSL is properly issued', detail: 'NSLs must be issued by an authorized FBI Special Agent in Charge or above. Confirm on FBI letterhead with proper certification language. No court approval is required but issuing authority must be verified.', tags: ['NSL','Legal','Validation'] },
+          { title: 'Note mandatory non-disclosure obligation', detail: 'NSLs carry a presumptive gag order. The recipient is prohibited from disclosing receipt to the subscriber or public. Log NDO. Consult legal if you have questions about scope of the prohibition.', tags: ['NSL','NDO','Critical','Confidentiality'] },
+          { title: 'Identify and produce responsive records', detail: 'NSLs under §2709 are limited to subscriber name, address, length of service, and toll billing records. Do not produce content. Do not over-produce.', tags: ['Scope','Production','NSL'] },
+          { title: 'Document and archive under strict access controls', detail: 'Archive NSL and all related documentation with restricted access. NSL records require heightened security given national security sensitivity.', tags: ['Archive','Security','NSL'] },
+        ]
+      },
+      {
+        name: 'Compliance, Audit & Reporting',
+        steps: [
+          { title: 'Maintain master lawful access log', detail: 'Keep a complete, auditable log of all requests received across all categories. Log must capture: date, type, agency, legal authority, agent, disposition, and archive location.', tags: ['Audit','Compliance','All Types'] },
+          { title: 'Conduct periodic self-audits', detail: 'Regularly review cases for procedural compliance, completeness of documentation, and proper scope adherence. Flag deficiencies for remediation.', tags: ['Audit','Quality'] },
+          { title: 'Track and report metrics', detail: 'Compile volume statistics by request type and agency. Report to legal/compliance leadership on cadence required by policy.', tags: ['Reporting','Metrics'] },
+          { title: 'Stay current on legal changes', detail: 'Monitor DOJ guidance, court decisions, and legislative updates affecting ECPA, CALEA, and related statutes. Update internal procedures accordingly.', tags: ['Legal','Training','Compliance'] },
+        ]
+      }
+    ]
+  },
+
+  gis: {
+    color: 'var(--accent-gis)',
+    phases: [
+      {
+        name: 'Project Setup',
+        steps: [
+          { title: 'Define project scope & deliverables', detail: 'Clarify output format (web map, static map, dashboard), audience, scale, and deadline.', tags: ['Planning'] },
+          { title: 'Identify data sources', detail: 'Catalog required layers: shapefiles, feature services, CAD imports, remote sensing data, attribute tables.', tags: ['Data','Planning'] },
+          { title: 'Set coordinate reference system (CRS)', detail: 'Define and document the projection. Ensure all data sources are aligned to the project CRS.', tags: ['Technical','CRS'] },
+          { title: 'Create ArcGIS Pro project or ArcGIS Online workspace', detail: 'Set up project folder structure. Connect geodatabases, enterprise connections, or Portal.', tags: ['Setup'] },
+        ]
+      },
+      {
+        name: 'Data Acquisition & Prep',
+        steps: [
+          { title: 'Import & validate source data', detail: 'Load all datasets. Run geometry checks. Identify null values, duplicate records, or attribute errors.', tags: ['Data QA'] },
+          { title: 'Reproject layers as needed', detail: 'Use Project tool to align non-conforming layers to project CRS.', tags: ['Technical'] },
+          { title: 'Clean and normalize attribute data', detail: 'Standardize field names, data types, and coded values. Join or relate tables as required.', tags: ['Data','QA'] },
+          { title: 'Clip / extract to area of interest (AOI)', detail: 'Use Clip or Extract by Mask to reduce data to project extent and improve performance.', tags: ['Processing'] },
+        ]
+      },
+      {
+        name: 'Spatial Analysis',
+        steps: [
+          { title: 'Define analysis question', detail: 'Document the spatial question being answered. Choose appropriate analytical method.', tags: ['Analysis','Planning'] },
+          { title: 'Run geoprocessing tools', detail: 'Execute relevant tools (Buffer, Intersect, Overlay, Network Analysis, Hotspot, etc.) per analysis plan.', tags: ['Geoprocessing'] },
+          { title: 'Validate analysis outputs', detail: 'Visually and statistically verify results. Check edge cases and boundary conditions.', tags: ['QA','Analysis'] },
+          { title: 'Document methodology', detail: 'Record tool parameters, input datasets, and processing steps in project notes or ModelBuilder diagram.', tags: ['Documentation'] },
+        ]
+      },
+      {
+        name: 'Map Authoring',
+        steps: [
+          { title: 'Apply symbology', detail: 'Set renderer type (classified, graduated, unique values, heatmap). Follow agency cartographic standards.', tags: ['Cartography'] },
+          { title: 'Label features', detail: 'Configure label classes, placement rules, scale ranges, and conflict resolution.', tags: ['Cartography'] },
+          { title: 'Build layout (for static maps)', detail: 'Add map frame, north arrow, scale bar, legend, title, metadata, and organizational branding.', tags: ['Layout'] },
+          { title: 'Configure pop-ups (for web maps)', detail: 'Define pop-up fields, aliases, formatting, and media attachments for web map layers.', tags: ['Web GIS'] },
+        ]
+      },
+      {
+        name: 'Publishing & Delivery',
+        steps: [
+          { title: 'Export or publish product', detail: 'Export PDF/PNG for static maps, or publish as Feature Service / Tile Layer to ArcGIS Online / Portal.', tags: ['Publishing'] },
+          { title: 'Set sharing & permissions', detail: 'Configure item sharing level (private, org, public). Assign appropriate group access.', tags: ['ArcGIS Online','Security'] },
+          { title: 'QA final deliverable', detail: 'Review final product against scope requirements. Confirm accuracy, completeness, and visual quality.', tags: ['QA'] },
+          { title: 'Deliver & document', detail: 'Send to client/stakeholder. Archive project files and document final outputs in project log.', tags: ['Delivery','Archive'] },
+        ]
+      }
+    ]
+  },
+
+  auto: {
+    color: 'var(--accent-auto)',
+    phases: [
+      {
+        name: 'Requirements & Planning',
+        steps: [
+          { title: 'Define automation objective', detail: 'Document what manual process is being automated, expected inputs/outputs, and success criteria.', tags: ['Planning'] },
+          { title: 'Identify data sources & dependencies', detail: 'List files, APIs, databases, or services the script will interact with. Note auth requirements.', tags: ['Planning','Data'] },
+          { title: 'Choose libraries & toolchain', detail: 'Select appropriate Python packages (e.g., arcpy, pandas, requests, paramiko, schedule). Document versions.', tags: ['Architecture'] },
+          { title: 'Define error handling strategy', detail: 'Plan for expected failure modes: timeouts, missing files, API errors. Define retry and alerting logic.', tags: ['Architecture'] },
+        ]
+      },
+      {
+        name: 'Development',
+        steps: [
+          { title: 'Set up virtual environment', detail: 'Create venv or conda environment. Pin dependencies in requirements.txt.', tags: ['Environment','Python'] },
+          { title: 'Write core logic', detail: 'Implement main processing functions. Keep logic modular — one function, one responsibility.', tags: ['Coding'] },
+          { title: 'Implement input validation', detail: 'Validate all inputs before processing. Fail fast with descriptive error messages.', tags: ['Coding','QA'] },
+          { title: 'Add logging', detail: 'Use Python logging module. Log INFO for normal ops, WARNING for recoverable issues, ERROR for failures.', tags: ['Logging'] },
+          { title: 'Write error handling & alerts', detail: 'Implement try/except blocks. Add email or notification hook for critical failures.', tags: ['Reliability'] },
+        ]
+      },
+      {
+        name: 'Testing & QA',
+        steps: [
+          { title: 'Unit test individual functions', detail: 'Write pytest tests for core functions. Use mock objects for external dependencies.', tags: ['Testing','pytest'] },
+          { title: 'Integration test end-to-end', detail: 'Run full script against test/staging data. Validate outputs match expected results.', tags: ['Testing'] },
+          { title: 'Test failure modes', detail: 'Simulate bad inputs, missing files, network failures. Confirm error handling works correctly.', tags: ['QA','Resilience'] },
+          { title: 'Peer review or self-review', detail: 'Review code for readability, efficiency, and security. Check for hardcoded credentials or paths.', tags: ['Review','Security'] },
+        ]
+      },
+      {
+        name: 'Deployment',
+        steps: [
+          { title: 'Prepare deployment environment', detail: 'Install dependencies on target system. Confirm Python version compatibility.', tags: ['Deployment'] },
+          { title: 'Configure scheduler or trigger', detail: 'Set up Windows Task Scheduler, cron, or workflow trigger. Document schedule and run conditions.', tags: ['Scheduler'] },
+          { title: 'Secure credentials', detail: 'Move all credentials to environment variables or a secrets manager. Never store in code.', tags: ['Security','Critical'] },
+          { title: 'Verify first production run', detail: 'Monitor first live execution. Confirm expected outputs. Check logs for warnings.', tags: ['Validation'] },
+        ]
+      },
+      {
+        name: 'Maintenance & Documentation',
+        steps: [
+          { title: 'Write user/operator documentation', detail: 'Document how to run the script, required inputs, expected outputs, and how to interpret logs.', tags: ['Documentation'] },
+          { title: 'Document known limitations', detail: 'Note edge cases, unsupported inputs, or known issues with workarounds.', tags: ['Documentation'] },
+          { title: 'Set up monitoring & alerting', detail: 'Configure log monitoring or health-check alerts. Define escalation path for failures.', tags: ['Monitoring'] },
+          { title: 'Version and archive code', detail: 'Commit final version to version control (Git). Tag release. Archive in approved repository.', tags: ['Version Control'] },
+        ]
+      }
+    ]
+  },
+
+  tech: {
+    color: 'var(--accent-tech)',
+    phases: [
+      {
+        name: 'Ticket Intake & Triage',
+        steps: [
+          { title: 'Receive & acknowledge support ticket', detail: 'Log ticket in system. Confirm receipt with customer. Capture: customer ID, circuit/service ID, symptom description, impact severity.', tags: ['Intake'] },
+          { title: 'Classify severity & priority', detail: 'Determine: P1 (service down), P2 (degraded), P3 (intermittent), P4 (informational). Set SLA clock.', tags: ['Triage','SLA'] },
+          { title: 'Gather baseline info', detail: 'Collect: circuit type, equipment make/model, site contact, last known good configuration, recent changes.', tags: ['Information'] },
+          { title: 'Assign or self-assign', detail: 'Confirm correct team/skill assignment. If escalated in, review prior actions taken by previous tier.', tags: ['Assignment'] },
+        ]
+      },
+      {
+        name: 'Remote Diagnostics',
+        steps: [
+          { title: 'Access remote management systems', detail: 'Connect via NMS, OSS, or element manager. Pull real-time alarms, port states, and performance data.', tags: ['Remote Access','NMS'] },
+          { title: 'Check physical layer indicators', detail: 'Verify signal levels, optical power (for fiber), TX/RX levels, bit error rates, LOS/LOF alarms.', tags: ['Layer 1','Diagnostics'] },
+          { title: 'Review recent alarm history', detail: 'Pull alarm log for last 24–72 hours. Identify pattern: intermittent vs. continuous, single point vs. cascading.', tags: ['Alarms','Analysis'] },
+          { title: 'Isolate fault domain', detail: 'Determine if fault is: customer premises equipment (CPE), local loop, network equipment, carrier backbone, or provisioning error.', tags: ['Isolation','Critical'] },
+        ]
+      },
+      {
+        name: 'Troubleshooting',
+        steps: [
+          { title: 'Test connectivity end-to-end', detail: 'Run loopback tests, ping/traceroute, or circuit test from both ends. Document results.', tags: ['Testing'] },
+          { title: 'Verify configuration & provisioning', detail: 'Compare running config against provisioning record. Check VLANs, routing, QoS, and service parameters.', tags: ['Config','Provisioning'] },
+          { title: 'Coordinate with customer site contact', detail: 'Guide site contact through local checks: power, cabling, CPE status lights, restart procedures if appropriate.', tags: ['Customer','Coordination'] },
+          { title: 'Escalate to carrier or vendor if needed', detail: 'Open upstream ticket with carrier. Provide all diagnostic data. Track carrier case number in your ticket.', tags: ['Escalation','Carrier'] },
+          { title: 'Apply fix or workaround', detail: 'Implement corrective action: config correction, remote reboot, route re-advertisement, spare circuit cutover, etc.', tags: ['Resolution'] },
+        ]
+      },
+      {
+        name: 'Verification & Restoration',
+        steps: [
+          { title: 'Confirm service restoration', detail: 'Verify traffic is flowing, alarms cleared, performance metrics are within normal thresholds.', tags: ['Verification'] },
+          { title: 'Validate with customer', detail: 'Contact customer/site contact and confirm service is restored from their perspective.', tags: ['Customer'] },
+          { title: 'Monitor for stability', detail: 'Watch circuit for 15–30 minutes post-fix. Confirm no re-alarm or intermittent behavior.', tags: ['Monitoring'] },
+        ]
+      },
+      {
+        name: 'Closeout & Documentation',
+        steps: [
+          { title: 'Document root cause', detail: 'Write clear RCA: what failed, why it failed, how it was detected, and what fixed it.', tags: ['Documentation','RCA'] },
+          { title: 'Record all actions & timeline', detail: 'Log every diagnostic step, contact made, command run, and change applied with timestamps.', tags: ['Audit','Documentation'] },
+          { title: 'Update asset or config records', detail: 'If config was corrected or equipment changed, update NMS/OSS records to reflect current state.', tags: ['Asset Mgmt'] },
+          { title: 'Close ticket & notify customer', detail: 'Set ticket to resolved/closed. Send closure notification with summary of actions and resolution.', tags: ['Closeout'] },
+          { title: 'Flag for recurring issue review', detail: 'If this is a repeat issue, flag for trend analysis, permanent fix, or vendor escalation.', tags: ['Quality','Improvement'] },
+        ]
+      }
+    ]
+  }, // end tech
+
+  mgr: {
+    color: 'var(--accent-mgr)',
+    phases: [
+      {
+        name: 'Daily Operations',
+        steps: [
+          { title: 'Review overnight tickets & open cases', detail: 'Check queue for P1/P2 issues that came in after hours. Confirm handoffs were documented and nothing fell through the cracks.', tags: ['Daily','P1','Triage'] },
+          { title: 'Review team workload & ticket distribution', detail: 'Assess ticket volume per tech. Redistribute if any engineer is overloaded or a critical ticket is sitting idle.', tags: ['Queue Mgmt'] },
+          { title: 'Stand-up / team sync', detail: 'Brief daily touchpoint: blockers, escalations in flight, any notable outages or at-risk SLAs for the day.', tags: ['Leadership','Daily'] },
+          { title: 'Monitor SLA compliance', detail: 'Check SLA dashboard for tickets approaching breach. Proactively intervene before SLAs are missed.', tags: ['SLA','Monitoring'] },
+        ]
+      },
+      {
+        name: 'Escalation Management',
+        steps: [
+          { title: 'Accept and review escalated tickets', detail: 'When a case is escalated to your level, review full ticket history, actions taken, and current status before engaging.', tags: ['Escalation'] },
+          { title: 'Assign to correct technical resource', detail: 'Route to appropriate SME or consultant. Ensure the right expertise is applied. Do not reassign without briefing the new owner.', tags: ['Routing','Escalation'] },
+          { title: 'Engage customer/stakeholder directly', detail: 'For high-visibility escalations, contact the customer directly to set expectations and demonstrate ownership.', tags: ['Customer','Escalation'] },
+          { title: 'Track escalation to closure', detail: 'Own escalated tickets through to resolution. Do not consider closed until customer confirms satisfaction.', tags: ['Ownership'] },
+        ]
+      },
+      {
+        name: 'Team Performance',
+        steps: [
+          { title: 'Review key metrics (MTTR, FCR, SLA%)', detail: 'Analyze mean time to resolve, first contact resolution rate, and SLA compliance. Identify trends week-over-week.', tags: ['Metrics','KPI'] },
+          { title: 'Identify coaching opportunities', detail: 'Flag recurring skill gaps from ticket reviews. Determine if individual coaching or team training is warranted.', tags: ['Coaching','Development'] },
+          { title: '1:1s with direct reports', detail: 'Conduct regular individual check-ins. Discuss case load, career development, blockers, and recognition.', tags: ['1on1','Leadership'] },
+          { title: 'Document performance observations', detail: 'Maintain running notes on team member performance for use in reviews, commendations, or PIPs.', tags: ['Documentation','HR'] },
+        ]
+      },
+      {
+        name: 'Process & Improvement',
+        steps: [
+          { title: 'Identify repeat failure patterns', detail: 'Run ticket trend analysis. If the same issues recur, escalate to engineering or document a permanent fix process.', tags: ['Analysis','Quality'] },
+          { title: 'Update / create runbooks', detail: 'Ensure resolution procedures are documented and current. Assign runbook ownership per topic area.', tags: ['Documentation','Runbook'] },
+          { title: 'Coordinate cross-team improvements', detail: 'Work with engineering, automation team, and NOC to close systemic gaps. Track improvement actions to completion.', tags: ['Collaboration','Improvement'] },
+          { title: 'Report to leadership', detail: 'Prepare weekly or monthly operational summary: ticket volume, SLA performance, top issues, team capacity, risks.', tags: ['Reporting','Leadership'] },
+        ]
+      },
+      {
+        name: 'Capacity & Planning',
+        steps: [
+          { title: 'Review staffing levels vs. demand', detail: 'Compare incoming ticket volume trends against available staff. Flag capacity risks to leadership proactively.', tags: ['Capacity','Planning'] },
+          { title: 'Manage on-call schedule', detail: 'Maintain fair, documented on-call rotation. Ensure coverage for holidays, PTO, and high-risk maintenance windows.', tags: ['Scheduling'] },
+          { title: 'Onboard and train new team members', detail: 'Manage onboarding checklist for new hires. Assign mentors. Confirm access, tools, and training are complete.', tags: ['Onboarding','Training'] },
+          { title: 'Recognize and retain top performers', detail: 'Identify and acknowledge high performers through formal and informal recognition. Document for annual review input.', tags: ['Retention','Leadership'] },
+        ]
+      }
+    ]
+  },
+
+  lead: {
+    color: 'var(--accent-lead)',
+    phases: [
+      {
+        name: 'Team & Sprint Planning',
+        steps: [
+          { title: 'Review automation backlog & prioritize', detail: 'Work with stakeholders to prioritize automation requests by business impact, complexity, and dependencies.', tags: ['Planning','Backlog'] },
+          { title: 'Assign work to team members', detail: 'Match tasks to engineer skill sets. Balance workload. Set clear deliverables and deadlines.', tags: ['Assignment','Leadership'] },
+          { title: 'Run sprint kickoff or planning meeting', detail: 'Align team on sprint goals, acceptance criteria, and dependencies. Confirm everyone is unblocked to start.', tags: ['Agile','Planning'] },
+          { title: 'Set up tracking in project management tool', detail: 'Create/update tasks, assign owners, set milestones. Ensure progress is visible to stakeholders.', tags: ['Tracking'] },
+        ]
+      },
+      {
+        name: 'Technical Direction',
+        steps: [
+          { title: 'Define coding & architecture standards', detail: 'Establish team-wide standards: naming conventions, repo structure, logging patterns, error handling, documentation requirements.', tags: ['Standards','Architecture'] },
+          { title: 'Review and approve design proposals', detail: 'Review solution designs from team members before development begins. Catch architectural issues early.', tags: ['Review','Architecture'] },
+          { title: 'Conduct code reviews', detail: 'Review PRs for quality, security, maintainability, and adherence to standards. Provide constructive, specific feedback.', tags: ['Code Review','Quality'] },
+          { title: 'Evaluate new tools and libraries', detail: 'Assess proposed new dependencies or platforms. Document decision rationale. Keep stack intentional and maintainable.', tags: ['Evaluation','Tech'] },
+        ]
+      },
+      {
+        name: 'Delivery Oversight',
+        steps: [
+          { title: 'Monitor sprint progress & remove blockers', detail: 'Track daily progress. Proactively identify and clear blockers before they impact delivery.', tags: ['Delivery','Leadership'] },
+          { title: 'Review testing & QA before release', detail: 'Confirm automated tests pass, edge cases are covered, and no open critical bugs before approving deployment.', tags: ['QA','Release'] },
+          { title: 'Manage deployment approvals', detail: 'Coordinate deployment timing with ops/support teams. Approve production releases. Monitor first run.', tags: ['Deployment','Release'] },
+          { title: 'Conduct sprint retrospective', detail: 'Facilitate what went well / what to improve discussion. Document action items. Follow through on commitments.', tags: ['Retro','Agile'] },
+        ]
+      },
+      {
+        name: 'Stakeholder & Comms',
+        steps: [
+          { title: 'Communicate project status to leadership', detail: 'Provide regular, concise status updates. Flag risks and blockers early. Never let leadership be surprised.', tags: ['Reporting','Leadership'] },
+          { title: 'Gather and clarify requirements', detail: 'Work with requestors to translate business needs into clear technical requirements. Confirm scope in writing.', tags: ['Requirements'] },
+          { title: 'Manage scope and change requests', detail: 'Evaluate change requests for impact on timeline and resources. Get formal approval before adding scope.', tags: ['Scope','Change Mgmt'] },
+        ]
+      },
+      {
+        name: 'Team Development',
+        steps: [
+          { title: 'Mentor junior automation engineers', detail: 'Provide regular technical guidance. Pair-program on complex problems. Review code with teaching intent.', tags: ['Mentorship','Development'] },
+          { title: 'Identify and address skill gaps', detail: 'Assess team capabilities against current and future project needs. Recommend training or hiring.', tags: ['Skills','Planning'] },
+          { title: 'Document team knowledge base', detail: 'Ensure solutions, patterns, and lessons learned are captured in a shared, searchable knowledge repository.', tags: ['Documentation','Knowledge'] },
+          { title: 'Recognize team contributions', detail: 'Acknowledge wins publicly and individually. Build a culture of ownership and continuous improvement.', tags: ['Culture','Recognition'] },
+        ]
+      }
+    ]
+  },
+
+  consult: {
+    color: 'var(--accent-consult)',
+    phases: [
+      {
+        name: 'Escalation Intake',
+        steps: [
+          { title: 'Receive and accept escalation', detail: 'Confirm escalation is appropriate for Tier-3/consultant level. Obtain full ticket history, all prior actions, and current symptom state.', tags: ['Intake','Escalation'] },
+          { title: 'Brief prior owner', detail: 'Speak directly with the previous owner. Get verbal context beyond what is written in the ticket — nuances, hunches, attempted fixes.', tags: ['Handoff','Communication'] },
+          { title: 'Set customer expectations', detail: 'Contact customer. Introduce yourself and your role. Set realistic timeline expectations. Establish preferred contact method.', tags: ['Customer','Communication'] },
+          { title: 'Assess complexity and classify', detail: 'Categorize: configuration fault, design flaw, hardware failure, vendor defect, environmental/interference, or undocumented edge case.', tags: ['Classification','Analysis'] },
+        ]
+      },
+      {
+        name: 'Deep Diagnosis',
+        steps: [
+          { title: 'Build complete fault timeline', detail: 'Reconstruct a chronological timeline of the issue from first symptoms to present. Identify any correlation with changes, outages, or maintenance.', tags: ['Analysis','Timeline'] },
+          { title: 'Pull and analyze all available data', detail: 'Gather logs, alarms, performance counters, config snapshots, and test results. Look for patterns that lower tiers may have missed.', tags: ['Diagnostics','Data'] },
+          { title: 'Form and test hypotheses', detail: 'Apply systematic elimination. Document each hypothesis, test performed, and result. Do not skip steps due to assumption.', tags: ['Methodology','Critical'] },
+          { title: 'Consult vendor or carrier engineering', detail: 'Engage vendor TAC or carrier engineering if internal resources are exhausted. Provide complete diagnostic package upfront.', tags: ['Vendor','Escalation'] },
+          { title: 'Identify root cause', detail: 'Document the definitive root cause with supporting evidence. Differentiate root cause from contributing factors.', tags: ['RCA','Critical'] },
+        ]
+      },
+      {
+        name: 'Solution Development',
+        steps: [
+          { title: 'Develop resolution or workaround', detail: 'Design the fix. If a permanent fix is not immediately possible, implement a validated workaround to restore service.', tags: ['Solution'] },
+          { title: 'Assess risk of proposed fix', detail: 'Evaluate potential side effects. Determine if a maintenance window is required. Define rollback procedure.', tags: ['Risk','Change Mgmt'] },
+          { title: 'Gain approval for change', detail: 'Present resolution plan to customer and internal change management. Get explicit approval before proceeding.', tags: ['Change Mgmt','Approval'] },
+          { title: 'Implement and verify fix', detail: 'Execute change. Verify service restoration. Confirm fix resolves root cause, not just symptoms. Monitor for stability.', tags: ['Implementation','Verification'] },
+        ]
+      },
+      {
+        name: 'Knowledge Capture',
+        steps: [
+          { title: 'Write detailed RCA report', detail: 'Document: full timeline, diagnostic steps, root cause, evidence, fix applied, and lessons learned. Write for a future engineer who has never seen this issue.', tags: ['RCA','Documentation'] },
+          { title: 'Create or update knowledge base article', detail: 'Publish a KB article so lower tiers can recognize and resolve similar issues faster in the future.', tags: ['Knowledge Base','Documentation'] },
+          { title: 'Identify preventive measures', detail: 'Recommend monitoring, design, or process changes to prevent recurrence. Track recommendations through to action.', tags: ['Prevention','Improvement'] },
+          { title: 'Brief team on findings', detail: 'Share key insights with the support team and automation team where applicable. Turn hard-won knowledge into shared capability.', tags: ['Knowledge Transfer','Leadership'] },
+        ]
+      }
+    ]
+  },
+
+  mw: {
+    color: 'var(--accent-mw)',
+    phases: [
+      {
+        name: 'Link Design & Planning',
+        steps: [
+          { title: 'Define link requirements', detail: 'Capture: required capacity (Mbps/Gbps), availability target (e.g. 99.999%), frequency band, hop distance, regulatory constraints.', tags: ['Planning','Requirements'] },
+          { title: 'Conduct path survey / LOS analysis', detail: 'Perform line-of-sight analysis using terrain data. Identify obstructions, Fresnel zone clearance requirements, and K-factor assumptions.', tags: ['Path Survey','LOS'] },
+          { title: 'Run link budget calculation', detail: 'Calculate: EIRP, free-space path loss, atmospheric absorption, rain fade margin, and system gain. Confirm link meets availability target.', tags: ['Link Budget','RF'] },
+          { title: 'Select frequency band & channel plan', detail: 'Choose operating frequency. Define channel plan avoiding adjacent channel interference. Confirm regulatory licensing requirements.', tags: ['Frequency','Spectrum'] },
+          { title: 'Select equipment & antenna', detail: 'Specify radio, modem, antenna size and gain, and feedline based on link budget and environmental factors.', tags: ['Equipment','Antenna'] },
+        ]
+      },
+      {
+        name: 'Interference & RF Analysis',
+        steps: [
+          { title: 'Conduct interference study', detail: 'Analyze potential co-channel and adjacent channel interference from existing licensed links in the path corridor.', tags: ['Interference','RF'] },
+          { title: 'Review coordination database', detail: 'Check FCC ULS, ISED, or relevant national database for registered links that could interfere. File coordination as required.', tags: ['Coordination','Regulatory'] },
+          { title: 'Assess multipath fading risk', detail: 'Evaluate terrain and atmospheric conditions for multipath fading susceptibility. Apply appropriate fade margin.', tags: ['Fading','Propagation'] },
+          { title: 'Validate with propagation modeling tool', detail: 'Run final link analysis in Pathloss, Planet, or equivalent tool. Archive model file with project documentation.', tags: ['Modeling','Tools'] },
+        ]
+      },
+      {
+        name: 'Installation & Commissioning',
+        steps: [
+          { title: 'Review installation plan', detail: 'Verify antenna mounting specs, azimuth/elevation settings, cable routing, grounding plan, and power requirements before site visit.', tags: ['Installation','Review'] },
+          { title: 'Antenna alignment guidance', detail: 'Provide alignment targets: azimuth, elevation, polarization. Coordinate simultaneous alignment from both ends using RSL monitoring.', tags: ['Alignment','Commissioning'] },
+          { title: 'Verify RSL at commissioning', detail: 'Confirm received signal level is within +/- 2 dB of predicted value. Investigate and resolve discrepancies before acceptance.', tags: ['RSL','Verification'] },
+          { title: 'Commission adaptive modulation & ACM', detail: 'Configure and verify ACM thresholds. Confirm modulation steps through full range under controlled conditions.', tags: ['ACM','Configuration'] },
+          { title: 'Run BER / performance test', detail: 'Conduct bit error rate and throughput tests. Verify performance meets spec across full modulation range.', tags: ['BER','Testing'] },
+        ]
+      },
+      {
+        name: 'Troubleshooting & Support',
+        steps: [
+          { title: 'Analyze alarm profile', detail: 'Review active and historical alarms: LOF, LOS, excessive BER, RSL deviation, equipment faults. Identify alarm patterns.', tags: ['Alarms','Diagnostics'] },
+          { title: 'Check RSL vs. predicted / historical baseline', detail: 'Compare current RSL to predicted and to historical normal. RSL degradation indicates fading, obstruction, or antenna misalignment.', tags: ['RSL','Analysis'] },
+          { title: 'Assess atmospheric / weather correlation', detail: 'Correlate fault timing with weather data. Identify ducting, rain fade, or fog-related propagation anomalies.', tags: ['Propagation','Weather'] },
+          { title: 'Diagnose equipment vs. path fault', detail: 'Distinguish between radio/modem failure and path degradation. Use loopback, spare swap, and RSL data to isolate.', tags: ['Isolation','Diagnostics'] },
+          { title: 'Coordinate remote or field corrective action', detail: 'Issue clear, specific instructions to field tech for antenna re-alignment, equipment swap, or cable inspection.', tags: ['Field','Coordination'] },
+        ]
+      },
+      {
+        name: 'SME Duties',
+        steps: [
+          { title: 'Review and approve link designs', detail: 'Perform technical review of designs submitted by other engineers. Document approval with specific criteria checked.', tags: ['Review','Approval'] },
+          { title: 'Develop and maintain microwave standards', detail: 'Own and update internal microwave design standards, link budget templates, and commissioning procedures.', tags: ['Standards','Documentation'] },
+          { title: 'Train and mentor engineers on MW topics', detail: 'Deliver training on propagation theory, link budget, equipment operation, and troubleshooting methodology.', tags: ['Training','Mentorship'] },
+          { title: 'Evaluate new microwave technologies', detail: 'Assess new platforms, modulation schemes (e.g. 4096-QAM), frequency bands (E-band, V-band), and hybrid fiber-MW solutions.', tags: ['Evaluation','Innovation'] },
+          { title: 'Represent organization in vendor/industry discussions', detail: 'Act as technical point of contact with equipment vendors. Participate in standards bodies or industry working groups as appropriate.', tags: ['Vendor','Representation'] },
+        ]
+      }
+    ]
+  }
+
+}; // end ROLES
+const state = {};
+
+function initState() {
+  for (const [role, data] of Object.entries(ROLES)) {
+    state[role] = {};
+    data.phases.forEach((phase, pi) => {
+      state[role][pi] = { open: pi === 0, steps: {} };
+      phase.steps.forEach((_, si) => {
+        state[role][pi].steps[si] = false;
+      });
+    });
+  }
+}
+
+function getAccent(role) {
+  return { calea: '#00c8ff', gis: '#00e87a', auto: '#f5a623', tech: '#c084fc', mgr: '#ff6b6b', lead: '#ffd93d', consult: '#ff9a3c', mw: '#00f5d4' }[role];
+}
+
+function renderAll() {
+  for (const role of Object.keys(ROLES)) {
+    renderRole(role);
+  }
+}
+
+function renderRole(role) {
+  const data = ROLES[role];
+  const accent = getAccent(role);
+  const phasesEl = document.getElementById('phases-' + role);
+  const summaryEl = document.getElementById('summary-' + role);
+
+  let totalSteps = 0, doneSteps = 0;
+  data.phases.forEach((phase, pi) => {
+    phase.steps.forEach((_, si) => {
+      totalSteps++;
+      if (state[role][pi].steps[si]) doneSteps++;
+    });
+  });
+
+  const pct = totalSteps ? Math.round((doneSteps / totalSteps) * 100) : 0;
+  summaryEl.innerHTML = `
+    <div class="summary-stat"><strong style="color:${accent}">${doneSteps}</strong>steps done</div>
+    <div class="summary-stat"><strong style="color:${accent}">${totalSteps - doneSteps}</strong>remaining</div>
+    <div class="summary-stat"><strong style="color:${accent}">${pct}%</strong>complete</div>
+    <div style="flex:1;min-width:100px">
+      <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${accent};transition:width 0.4s;border-radius:2px"></div>
+      </div>
+    </div>
+  `;
+
+  phasesEl.innerHTML = '';
+  data.phases.forEach((phase, pi) => {
+    const phaseState = state[role][pi];
+    const total = phase.steps.length;
+    const done = Object.values(phaseState.steps).filter(Boolean).length;
+    const phasePct = total ? Math.round((done / total) * 100) : 0;
+    const isOpen = phaseState.open;
+
+    const phaseEl = document.createElement('div');
+    phaseEl.className = 'phase' + (isOpen ? ' open' : '');
+
+    const stepsHtml = phase.steps.map((step, si) => {
+      const checked = phaseState.steps[si];
+      const tagsHtml = step.tags.map(t =>
+        `<span class="tag" style="color:${accent};border-color:${accent}44">${t}</span>`
+      ).join('');
+      return `
+        <div class="step ${checked ? 'done' : ''}" onclick="toggleStep('${role}',${pi},${si})">
+          <div class="step-check">${checked ? '✓' : ''}</div>
+          <div class="step-body">
+            <div class="step-title">${step.title}</div>
+            <div class="step-detail">${step.detail}</div>
+            <div class="step-tags">${tagsHtml}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    phaseEl.innerHTML = `
+      <div class="phase-header" onclick="togglePhase('${role}',${pi})">
+        <div class="phase-label">
+          <span class="phase-num">0${pi + 1}</span>
+          <span class="phase-name" style="color:${accent}">${phase.name}</span>
+        </div>
+        <span class="phase-progress">${done}/${total}</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="phase-bar-wrap"><div class="phase-bar" style="width:${phasePct}%;background:${accent}"></div></div>
+      <div class="steps">${stepsHtml}</div>
+    `;
+
+    phasesEl.appendChild(phaseEl);
+  });
+}
+
+function togglePhase(role, pi) {
+  state[role][pi].open = !state[role][pi].open;
+  renderRole(role);
+}
+
+function toggleStep(role, pi, si) {
+  state[role][pi].steps[si] = !state[role][pi].steps[si];
+  renderRole(role);
+}
+
+function resetRole(role) {
+  const data = ROLES[role];
+  data.phases.forEach((phase, pi) => {
+    state[role][pi].open = pi === 0;
+    phase.steps.forEach((_, si) => { state[role][pi].steps[si] = false; });
+  });
+  renderRole(role);
+}
+
+function switchRole(role) {
+  document.querySelectorAll('.role-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('role-' + role).classList.add('active');
+  document.querySelector(`.tab[data-role="${role}"]`).classList.add('active');
+}
+
+initState();
+renderAll();
+</script>
+</body>
+</html>
