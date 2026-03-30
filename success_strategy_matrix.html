@@ -1,0 +1,224 @@
+
+<style>
+  :root { --gap: 2px; }
+  body { margin: 0; }
+  .wrap { padding: 8px 0 16px; font-size: 13px; color: var(--color-text-primary); }
+  h3 { margin: 0 0 6px; font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .subtitle { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 14px; }
+  .grid-outer { display: grid; grid-template-columns: 56px 1fr; grid-template-rows: 1fr 28px; gap: 0; }
+  .y-label { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-size: 11px; color: var(--color-text-secondary); font-weight: 500; letter-spacing: .04em; grid-row: 1; grid-column: 1; padding-bottom: 28px; }
+  .x-label { grid-row: 2; grid-column: 2; text-align: center; font-size: 11px; color: var(--color-text-secondary); font-weight: 500; letter-spacing: .04em; padding-top: 6px; }
+  .matrix { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr 1fr; gap: var(--gap); grid-row: 1; grid-column: 2; min-height: 460px; }
+  .cell { border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 4px; position: relative; }
+  .cell-label { font-size: 9.5px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; opacity: .7; margin-bottom: 2px; }
+  .chip { border-radius: 5px; padding: 4px 7px; font-size: 11px; line-height: 1.3; cursor: pointer; transition: transform .12s, box-shadow .12s; font-weight: 400; display: inline-block; }
+  .chip:hover { transform: scale(1.07); }
+  .chip.new { font-style: italic; }
+
+  /* Quadrant colors */
+  .q1 { background: #E1F5EE; }
+  .q2 { background: #E6F1FB; }
+  .q3 { background: #FAEEDA; }
+  .q4 { background: #FCEBEB; }
+
+  .q1 .chip { background: #9FE1CB; color: #085041; }
+  .q2 .chip { background: #B5D4F4; color: #0C447C; }
+  .q3 .chip { background: #FAC775; color: #633806; }
+  .q4 .chip { background: #F7C1C1; color: #791F1F; }
+
+  .q1 .cell-label { color: #0F6E56; }
+  .q2 .cell-label { color: #185FA5; }
+  .q3 .cell-label { color: #854F0B; }
+  .q4 .cell-label { color: #A32D2D; }
+
+  @media (prefers-color-scheme: dark) {
+    .q1 { background: #04342C; } .q2 { background: #042C53; }
+    .q3 { background: #412402; } .q4 { background: #501313; }
+    .q1 .chip { background: #085041; color: #9FE1CB; }
+    .q2 .chip { background: #0C447C; color: #B5D4F4; }
+    .q3 .chip { background: #633806; color: #FAC775; }
+    .q4 .chip { background: #791F1F; color: #F7C1C1; }
+    .q1 .cell-label { color: #5DCAA5; } .q2 .cell-label { color: #85B7EB; }
+    .q3 .cell-label { color: #EF9F27; } .q4 .cell-label { color: #E24B4A; }
+  }
+
+  .axis-strip { display: flex; gap: var(--gap); margin-bottom: var(--gap); }
+  .axis-end { font-size: 10px; color: var(--color-text-secondary); text-align: center; flex: 1; }
+
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 11px; color: var(--color-text-secondary); align-items: center; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+
+  .tooltip { position: fixed; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: 8px; padding: 10px 13px; font-size: 12px; pointer-events: none; max-width: 220px; z-index: 999; box-shadow: 0 2px 12px rgba(0,0,0,.15); display: none; color: var(--color-text-primary); }
+  .tooltip strong { display: block; font-size: 13px; margin-bottom: 3px; font-weight: 500; }
+  .tooltip .t-new { color: var(--color-text-secondary); font-style: italic; font-size: 11px; }
+</style>
+<div class="wrap">
+  <h3>Success strategy matrix</h3>
+  <p class="subtitle">Top-left = highest impact &amp; easiest to start · Bottom-right = lower payoff or heavy lift</p>
+
+  <div class="axis-strip">
+    <div class="axis-end" style="grid-column:2">← Easier to implement</div>
+    <div class="axis-end">Harder to implement →</div>
+  </div>
+
+  <div class="grid-outer">
+    <div class="y-label">← Lower effectiveness &nbsp;&nbsp;&nbsp; Higher effectiveness →</div>
+    <div class="matrix" id="matrix"></div>
+    <div class="x-label">Ease of implementation →</div>
+  </div>
+
+  <div class="legend">
+    <span><span class="leg-dot" style="background:#5DCAA5"></span>High impact, easy</span>
+    <span><span class="leg-dot" style="background:#85B7EB"></span>High impact, harder</span>
+    <span><span class="leg-dot" style="background:#EF9F27"></span>Lower impact, easy</span>
+    <span><span class="leg-dot" style="background:#E24B4A"></span>Lower impact, harder</span>
+    <span><em style="font-size:11px">Italic = added strategy</em></span>
+  </div>
+</div>
+<div class="tooltip" id="tip"></div>
+
+<script>
+const data = [
+  // quadrant: 1=top-left(high/easy), 2=top-right(high/hard), 3=bottom-left(low/easy), 4=bottom-right(low/hard)
+  // [name, quadrant, isNew, description, effort, effectiveness]
+  ["Eisenhower Matrix",       1, false, "Urgent/important grid — immediate clarity on priorities. Requires no training, zero tools.", "Minutes to learn", "Very high — cuts task noise fast"],
+  ["Pareto Principle (80/20)",1, false, "Focus on the 20% of inputs driving 80% of results. Powerful mental model, trivial to apply.", "Low — just ask 'what 20%?'", "Very high — redirects effort to high-leverage work"],
+  ["SMARTER Goals",           1, false, "Extends SMART with Evaluated & Revised. Easy habit, dramatically sharpens goal quality.", "Low — 10-min goal audit", "High — prevents vague, untracked goals"],
+  ["Pomodoro Technique",      1, false, "25-min focused sprints with short breaks. Immediate productivity boost, free tools everywhere.", "Very low — a timer suffices", "High — combats distraction and burnout"],
+  ["Five Whys",               1, false, "Ask 'why?' five times to find root cause. No tools needed, works in any conversation.", "Very low", "High — eliminates recurring problems"],
+  ["Mind Mapping",            1, false, "Visual brainstorming via branching diagrams. Fast to learn, unlocks non-linear thinking.", "Low — pen & paper works", "High for creative & planning tasks"],
+  ["GROW Model",              1, false, "Goal–Reality–Options–Will coaching framework. Easy to memorize, powerful for 1:1s.", "Low — conversational", "High for leadership & coaching"],
+  ["Getting Things Done",     1, true,  "David Allen's capture/clarify/organize/engage system. Clears mental RAM immediately.", "Low-medium — start with inbox zero", "Very high — eliminates cognitive overhead"],
+  ["Deep Work (Cal Newport)", 1, true,  "Protect blocks of uninterrupted focus time. Schedule it and start — that's the whole move.", "Low — calendar blocking", "Very high — multiplies output quality"],
+
+  ["7 Habits (Covey)",        2, false, "Transformational framework across personal, interpersonal, and organizational effectiveness.", "Medium — requires reflection & habit change", "Very high — foundational mindset shift"],
+  ["4DX (4 Disciplines)",     2, false, "Focus on Wildly Important Goals, lead measures, scoreboards, WIG sessions.", "Medium-high — needs team buy-in", "High for organizational execution"],
+  ["ADEPT",                   2, false, "Analogy–Diagram–Example–Plain English–Technical explanation framework for communication.", "Medium — practice-based", "High for teaching and knowledge transfer"],
+  ["Balanced Scorecard",      2, false, "Tracks financial, customer, internal process, and learning KPIs simultaneously.", "High — needs org-wide alignment", "High for strategic management"],
+  ["Agile Methodology",       2, false, "Iterative delivery via sprints, retrospectives, and continuous feedback loops.", "High — culture + tooling shift", "Very high for product/software teams"],
+  ["SCRUM",                   2, false, "Specific Agile framework with defined roles (PO, SM), ceremonies, and artifacts.", "High — formal training recommended", "Very high for cross-functional teams"],
+  ["OKRs (Objectives & KRs)", 2, true,  "Ambitious objectives paired with measurable key results — used by Google, Intel.", "Medium — needs cadence discipline", "Very high for focus and alignment"],
+  ["First Principles Thinking",2,true,  "Break problems to fundamentals, rebuild from scratch. Elon Musk, Aristotle.", "Medium — mental rewiring required", "Very high — unlocks breakthrough solutions"],
+
+  ["Rule of 5 (Maxwell)",     3, false, "Do 5 things daily toward your main goal — simple daily action system.", "Very low — just list 5 things", "Moderate — consistency over insight"],
+  ["MBO (Peter Drucker)",     3, false, "Align individual objectives with organizational goals via joint goal-setting.", "Medium — manager+employee coordination", "Moderate — depends on goal quality"],
+  ["The 5 AM Club (Sharma)",  3, false, "20/20/20 morning routine: exercise, reflection, learning. Lifestyle-level change.", "Medium — habit stack overhaul", "Moderate — high for motivated individuals"],
+  ["Eat the Frog",            3, true,  "Tackle the hardest task first each morning. Simple rule, strong momentum effect.", "Very low — just reorder your day", "Moderate-high for procrastinators"],
+  ["Parkinson's Law",         3, true,  "Work expands to fill time available — artificially compress deadlines.", "Very low — set shorter timelines", "Moderate — situational impact"],
+
+  ["SWOT Analysis",           4, false, "Strengths/Weaknesses/Opportunities/Threats. Often produces insights that gather dust.", "Low — a whiteboard session", "Moderate — better for framing than execution"],
+  ["Lean Six Sigma",          4, false, "Combines waste elimination (Lean) with defect reduction (Six Sigma). Data-heavy.", "Very high — certification + org change", "High in manufacturing/ops — limited elsewhere"],
+  ["PDCA (Plan-Do-Check-Act)",4, false, "Deming's continuous improvement cycle. Rigorous and slow-moving by design.", "Medium-high — requires measurement discipline", "High for process ops, low elsewhere"],
+  ["Theory of Constraints",   4, true,  "Identify and elevate the single binding constraint in any system (Goldratt).", "High — systems analysis required", "High once identified — hard to find constraint"],
+];
+
+const cells = [
+  { q: 1, label: "High impact · Easy to implement", cls: "q1" },
+  { q: 2, label: "High impact · Harder to implement", cls: "q2" },
+  { q: 1, label: "High impact · Easy to implement", cls: "q1" },
+  { q: 2, label: "High impact · Harder to implement", cls: "q2" },
+  { q: 3, label: "Lower impact · Easy to implement", cls: "q3" },
+  { q: 4, label: "Lower impact · Harder to implement", cls: "q4" },
+  { q: 3, label: "Lower impact · Easy to implement", cls: "q3" },
+  { q: 4, label: "Lower impact · Harder to implement", cls: "q4" },
+  { q: 1, label: "", cls: "q1" },
+  { q: 2, label: "", cls: "q2" },
+  { q: 1, label: "", cls: "q1" },
+  { q: 2, label: "", cls: "q2" },
+  { q: 3, label: "", cls: "q3" },
+  { q: 4, label: "", cls: "q4" },
+  { q: 3, label: "", cls: "q3" },
+  { q: 4, label: "", cls: "q4" },
+];
+
+// Build 4x4 matrix (row-major: row0=top)
+// Layout: cols = easy→hard, rows = high→low impact
+// quadrant mapping: q1=top-left(easy,high), q2=top-right(hard,high), q3=bottom-left(easy,low), q4=bottom-right(hard,low)
+const quadrantCells = { 1: [], 2: [], 3: [], 4: [] };
+data.forEach(d => quadrantCells[d[1]].push(d));
+
+// grid positions (row, col) 0-indexed, 4x4
+// row 0-1 = high impact, row 2-3 = lower impact
+// col 0-1 = easy, col 2-3 = hard
+const positions = [
+  {q:1, r:0, c:0}, {q:1, r:0, c:1},
+  {q:2, r:0, c:2}, {q:2, r:0, c:3},
+  {q:1, r:1, c:0}, {q:1, r:1, c:1},
+  {q:2, r:1, c:2}, {q:2, r:1, c:3},
+  {q:3, r:2, c:0}, {q:3, r:2, c:1},
+  {q:4, r:2, c:2}, {q:4, r:2, c:3},
+  {q:3, r:3, c:0}, {q:3, r:3, c:1},
+  {q:4, r:3, c:2}, {q:4, r:3, c:3},
+];
+
+// Assign strategies to cells
+const cellContents = {};
+positions.forEach(p => { cellContents[`${p.r},${p.c}`] = { q: p.q, items: [] }; });
+
+const assigned = { 1: 0, 2: 0, 3: 0, 4: 0 };
+const cellsByQ = {};
+positions.forEach(p => {
+  if (!cellsByQ[p.q]) cellsByQ[p.q] = [];
+  cellsByQ[p.q].push(`${p.r},${p.c}`);
+});
+
+// Distribute strategies round-robin across quadrant cells
+[1,2,3,4].forEach(q => {
+  const items = quadrantCells[q];
+  const cells_q = cellsByQ[q];
+  items.forEach((item, i) => {
+    const cellKey = cells_q[i % cells_q.length];
+    cellContents[cellKey].items.push(item);
+  });
+});
+
+const matrix = document.getElementById('matrix');
+const tip = document.getElementById('tip');
+
+const qCls = { 1: 'q1', 2: 'q2', 3: 'q3', 4: 'q4' };
+const qLabels = {
+  1: 'High impact · Easy to start',
+  2: 'High impact · Needs investment',
+  3: 'Lower impact · Easy to start',
+  4: 'Lower impact · Harder to justify',
+};
+
+for (let r = 0; r < 4; r++) {
+  for (let c = 0; c < 4; c++) {
+    const key = `${r},${c}`;
+    const cell = cellContents[key];
+    const div = document.createElement('div');
+    div.className = `cell ${qCls[cell.q]}`;
+    // Only show label on top-left cell of each quadrant
+    if ((r===0 && c===0) || (r===0 && c===2) || (r===2 && c===0) || (r===2 && c===2)) {
+      const lbl = document.createElement('div');
+      lbl.className = 'cell-label';
+      lbl.textContent = qLabels[cell.q];
+      div.appendChild(lbl);
+    }
+    cell.items.forEach(item => {
+      const chip = document.createElement('span');
+      chip.className = 'chip' + (item[2] ? ' new' : '');
+      chip.textContent = item[0];
+      chip.addEventListener('mouseenter', e => {
+        tip.style.display = 'block';
+        tip.innerHTML = `<strong>${item[0]}</strong>${item[3]}<br><br><span style="color:var(--color-text-secondary);font-size:11px">⚡ Effort: ${item[4]}<br>📈 Impact: ${item[5]}</span>${item[2] ? '<div class="t-new">★ Added strategy</div>' : ''}`;
+        moveTip(e);
+      });
+      chip.addEventListener('mousemove', moveTip);
+      chip.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+      chip.addEventListener('click', () => {
+        window.sendPrompt && sendPrompt(`Tell me more about ${item[0]} — how do I implement it and what are the key steps?`);
+      });
+      div.appendChild(chip);
+    });
+    matrix.appendChild(div);
+  }
+}
+
+function moveTip(e) {
+  const x = e.clientX, y = e.clientY;
+  tip.style.left = (x + 14) + 'px';
+  tip.style.top = (y - 10) + 'px';
+}
+</script>
