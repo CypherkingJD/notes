@@ -1,0 +1,111 @@
+
+<style>
+.eco-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; padding: 4px 0 16px; }
+.eco-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 5px; }
+.eco-pill { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 20px; margin-bottom: 2px; width: fit-content; }
+.pill-teal   { background: #E1F5EE; color: #085041; }
+.pill-purple { background: #EEEDFE; color: #3C3489; }
+.pill-amber  { background: #FAEEDA; color: #633806; }
+.pill-coral  { background: #FAECE7; color: #712B13; }
+.pill-blue   { background: #E6F1FB; color: #0C447C; }
+.pill-green  { background: #EAF3DE; color: #27500A; }
+.pill-gray   { background: #F1EFE8; color: #444441; }
+.eco-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+.eco-sub { font-size: 13px; color: var(--color-text-secondary); margin: 0; line-height: 1.5; }
+.eco-meta { font-size: 12px; color: var(--color-text-tertiary); margin: 0; }
+.eco-divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 8px 0; }
+.eco-btn { margin-top: 6px; font-size: 13px; color: var(--color-text-info); background: none; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 7px 12px; cursor: pointer; text-align: left; width: 100%; }
+.eco-btn:hover { background: var(--color-background-secondary); }
+.eco-note { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 16px; font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+</style>
+
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 14px;">Nine life domains, each a distinct workflow. All integrate through the weekly review in the Planning domain. Click any card to generate that BPMN flow.</p>
+
+<div class="eco-grid">
+
+  <div class="eco-card">
+    <span class="eco-pill pill-teal">Weekly + monthly</span>
+    <p class="eco-title">Finance</p>
+    <p class="eco-sub">Budgeting, bill payment, investing cadence, monthly review.</p>
+    <hr class="eco-divider">
+    <span class="eco-meta">Trigger: Sunday + bill arrives + month-end</span>
+    <button class="eco-btn" onclick="sendPrompt('Design a BPMN workflow for personal finance: weekly budgeting, bill payment, and monthly review cycles with decision gateways. Show clean swimlane diagrams with proper box spacing.')">View flow ↗</button>
+  </div>
+
+  <div class="eco-card">
+    <span class="eco-pill pill-purple">Weekly + annual</span>
+    <p class="eco-title">Health</p>
+    <p class="eco-sub">Exercise scheduling, meal planning, medical appointments, prescription refills.</p>
+    <hr class="eco-divider">
+    <span class="eco-meta">Trigger: weekly + event-driven + annual</span>
+    <button class="eco-btn" onclick="sendPrompt('Design a BPMN workflow for personal health management: weekly exercise and nutrition tracking, medical appointment scheduling, prescription refills, and annual checkup triggers. Show clean swimlane diagrams with proper box spacing.')">View flow ↗</button>
+  </div>
+
+  <div class="eco-card">
+    <span class="eco-pill pill-amber">Seasonal + on-demand</span>
+    <p class="eco-title">Home</p>
+    <p class="eco-sub">Maintenance tracking, repair triage, chore scheduling, seasonal tasks.</p>
+    <hr class="eco-divider">
+    <span class="eco-meta">Trigger: calendar + something breaks</span>
+    <button class="eco-btn" onclick="sendPrompt('Design a BPMN workflow for home management: maintenance scheduling, repair decision logic (DIY vs hire), chore routing, and seasonal task triggers. Show clean swimlane diagrams with proper box spacing.')">View flow ↗</button>
+  </div>
+
+  <div class="eco-card">
+    <span class="eco-pill pill-coral">Daily + weekly + quarterly</span>
+    <p class="eco-title">Planning</p>
+    <p class="eco-sub">Daily capture, weekly review, goal setting, quarterly OKR cycle.</p>
+    <hr class="eco-divider">
+    <span class="eco-meta">Master integration point for all domains</span>
+    <button class="eco-btn" onclick="sendPrompt('Design a BPMN workflow for personal planning: daily capture and triage, weekly review integrating all life domains, quarterly goal-setting cycle with escalation paths. Show clean swimlane diagrams with proper box spacing.')">View flow ↗</button>
+  </div>
+
+  <div class="eco-card">
+    <span class="eco-pill pill-blue">Event-driven + recurring</span>
+    <p class="eco-title">Relationships</p>
+    <p class="eco-sub">Birthday tracking, recurring check-ins, event planning, network nurturing.</p>
+    <hr class="eco-divider">
+    <span class="eco-meta">Trigger: calendar + life events</span>
+    <button class="eco-btn" onclick="sendPrompt('Design a BPMN workflow for relationship and social management: birthday and anniversary tracking, scheduled check-ins with close contacts, event planning loop, and network nurturing cadence. Show clean swimlane diagrams with proper box spacing.')">View flow ↗</button>
+  </div>
+
+  <div class="eco-card">
+    <span class="eco-pill pill-green">Project lifecycle</span>
+    <p class="eco-title">Personal projects</p>
+    <p class="eco-sub">Idea capture, feasibility triage, kickoff, active tracking, completion review.</p>
+    <hr class="eco-divider">
+    <span class="eco-meta">Trigger: idea arrives or weekly review</span>
+    <button class="eco-btn" onclick="sendPrompt('Design a BPMN workflow for personal project management: idea capture and triage gateway, feasibility check, project kickoff, weekly progress tracking, blocked project escalation, and completion retrospective. Show clean swimlane diagrams with proper box spacing.')">View flow ↗</button>
+  </div>
+
+  <div class="eco-card">
+    <span class="eco-pill pill-blue">Trip lifecycle</span>
+    <p class="eco-title">Travel</p>
+    <p class="eco-sub">Destination research, booking sequence, pre-trip checklist, travel day, post-trip close-out.</p>
+    <hr class="eco-divider">
+    <span class="eco-meta">Trigger: trip decision made</span>
+    <button class="eco-btn" onclick="sendPrompt('Design a BPMN workflow for travel planning: destination research and decision gateway, booking sequence, pre-trip checklist process, travel day execution, and post-trip close-out with expense reconciliation. Show clean swimlane diagrams with proper box spacing.')">View flow ↗</button>
+  </div>
+
+  <div class="eco-card">
+    <span class="eco-pill pill-purple">Spaced repetition cycles</span>
+    <p class="eco-title">Learning</p>
+    <p class="eco-sub">Topic intake, resource evaluation, study scheduling, progress review, knowledge retention.</p>
+    <hr class="eco-divider">
+    <span class="eco-meta">Trigger: topic identified or weekly review</span>
+    <button class="eco-btn" onclick="sendPrompt('Design a BPMN workflow for personal learning: topic intake and prioritisation, resource evaluation gateway, study session scheduling, spaced repetition review cycles, and progress milestone decisions. Show clean swimlane diagrams with proper box spacing.')">View flow ↗</button>
+  </div>
+
+  <div class="eco-card">
+    <span class="eco-pill pill-gray">Calendar-driven</span>
+    <p class="eco-title">Admin</p>
+    <p class="eco-sub">Document filing, renewal tracking, subscription audits, insurance and license reviews.</p>
+    <hr class="eco-divider">
+    <span class="eco-meta">Trigger: renewal date + annual review</span>
+    <button class="eco-btn" onclick="sendPrompt('Design a BPMN workflow for personal admin management: document filing and retrieval, renewal calendar tracking for insurance and licenses, subscription audit process, and annual admin review with decision gateways. Show clean swimlane diagrams with proper box spacing.')">View flow ↗</button>
+  </div>
+
+</div>
+
+<div class="eco-note">
+  <strong style="color:var(--color-text-primary);font-weight:500;">Integration note:</strong> All nine domains feed into the Planning workflow's weekly review. That process acts as the single integration point — surfacing items from each domain, routing them to the right decision gateway, and closing the loop into the next week's calendar.
+</div>
